@@ -1,4 +1,4 @@
-# soberty_streak
+# sobertystreak
 
 A new Flutter project.
 
