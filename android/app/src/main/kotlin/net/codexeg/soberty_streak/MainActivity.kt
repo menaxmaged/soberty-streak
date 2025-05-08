@@ -1,4 +1,4 @@
-package net.codexeg.sobertystreak
+package net.codexeg.soberty_streak
 
 import io.flutter.embedding.android.FlutterActivity
 
