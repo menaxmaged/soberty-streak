@@ -10,11 +10,11 @@ import SwiftUI
 
 struct Provider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: ConfigurationAppIntent())
+        SimpleEntry(date: Date(), days: 0)
     }
 
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
-        SimpleEntry(date: Date(), configuration: configuration)
+        SimpleEntry(date: Date(), days: 60)
     }
     
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
@@ -24,7 +24,7 @@ struct Provider: AppIntentTimelineProvider {
         let currentDate = Date()
         for hourOffset in 0 ..< 5 {
             let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, configuration: configuration)
+            let entry = SimpleEntry(date: entryDate, days: 55)
             entries.append(entry)
         }
 
@@ -38,20 +38,65 @@ struct Provider: AppIntentTimelineProvider {
 
 struct SimpleEntry: TimelineEntry {
     let date: Date
-    let configuration: ConfigurationAppIntent
+    let days: Int
 }
 
 struct StreakWidgetEntryView : View {
     var entry: Provider.Entry
 
     var body: some View {
-        Text("Time:")
-        Text(entry.date, style: .time)
+        VStack(alignment: .leading,spacing: 1){
+            Text("End of An Era").font(.system(size: 20, weight: .bold))
+            Text("started on 14 mar").font(.system(size: 15)).foregroundStyle(.secondary)
+            
+            
+            
+            
+            
+            StreakView(days: 55)
+            MonthStreak(days: 55)
+     
+        }.foregroundStyle(.red)
+            }
+}
 
-        Text("Favorite Emoji:")
-        Text(entry.configuration.favoriteEmoji)
+struct StreakView : View {
+    let days:Int
+    var body: some View{
+        HStack{
+            Text(String(days)).font(.system(size: 45, weight: .heavy).monospacedDigit())
+            Text("Days").font(.system(size: 20,weight: .bold)).foregroundStyle(.secondary)
+        }
+
+        
+    }
+    
+}
+
+struct MonthStreak: View {
+    let days: Int
+    let rows: Int = 2
+    let columns: Int = 6
+
+    var body: some View {
+        Grid(horizontalSpacing: 3, verticalSpacing: 3) {
+            // Loop through the rows
+            ForEach(0..<rows, id: \.self) { row in
+                // Loop through the columns in each row
+                GridRow {
+                    ForEach(0..<columns, id: \.self) { col in
+                        // Calculate the index for each day in the grid
+                        let index = row * columns + col
+                        let isFilled = index <= days/30
+                        Rectangle().frame(height: 8).foregroundStyle(isFilled ? .primary : .secondary)
+                    }
+                }
+            }
+        }
     }
 }
+
+
 
 struct StreakWidget: Widget {
     let kind: String = "StreakWidget"
@@ -59,7 +104,7 @@ struct StreakWidget: Widget {
     var body: some WidgetConfiguration {
         AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
             StreakWidgetEntryView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
+                .containerBackground(.black, for: .widget)
         }
     }
 }
@@ -81,6 +126,6 @@ extension ConfigurationAppIntent {
 #Preview(as: .systemSmall) {
     StreakWidget()
 } timeline: {
-    SimpleEntry(date: .now, configuration: .smiley)
-    SimpleEntry(date: .now, configuration: .starEyes)
+    SimpleEntry(date: .now, days: 29)
+    SimpleEntry(date: .now, days: 60)
 }
