@@ -79,9 +79,8 @@ struct WidgetComponents {
             Text(name)
                 .font(.system(size: 25, weight: .bold))
                 .lineLimit(1)
-                .truncationMode(.tail)
-                .minimumScaleFactor(0.5)
-                .foregroundStyle(.green)
+                .truncationMode(.tail)                            .frame(maxWidth: .infinity, alignment: .leading)
+
         }
     }
 

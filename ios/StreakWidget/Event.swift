@@ -6,11 +6,8 @@
 //
 
 import Foundation
-import SwiftUI
 
-import Foundation
-
-struct Event: Identifiable, Codable {
+struct Event: Identifiable, Codable ,Hashable{
     var id = UUID() // Unique identifier for each event
     var name: String
     var date: Date
@@ -48,4 +45,7 @@ struct Event: Identifiable, Codable {
         self.formattedDate = formatter.string(from: self.date)
     }
 }
+
+
+
 

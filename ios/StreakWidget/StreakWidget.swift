@@ -56,7 +56,8 @@ struct StreakWidgetEntryView: View {
     
     var body: some View {
         
-        if let selectedEvent = entry.configuration.selectedEvent?.rawValue {
+        if let selectedEvent = entry.configuration.selectedEvent//?.rawValue
+        {
             let event = dataService.getEvent(eventname: selectedEvent)
             
             
@@ -105,43 +106,16 @@ struct StreakWidget: Widget {
     }
 }
 
-extension ConfigurationAppIntent {
-    fileprivate static var nn: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-        intent.selectedEvent = .nn
-        return intent
-    }
-    
-    fileprivate static var zbi: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-        intent.selectedEvent = .sobriety
-
-        return intent
-    }
-    
-    fileprivate static var end: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-        intent.selectedEvent = .coding
-        return intent
-    }
-    
-    fileprivate static var none: ConfigurationAppIntent {
-        let intent = ConfigurationAppIntent()
-       
-        return intent
-    }
-}
-
 #Preview(as: .systemSmall) {
     StreakWidget()
 } timeline: {
     
-    
-    SimpleEntry(date: .now,configuration: .nn)
-    SimpleEntry(date: .now,configuration: .end)
-    
-    SimpleEntry(date: .now,configuration: .zbi)
-    SimpleEntry(date: .now,configuration: .none)
-    
-
+//    
+    SimpleEntry(date: .now,configuration: ConfigurationAppIntent())
+//    SimpleEntry(date: .now,configuration: .end)
+//    
+//    SimpleEntry(date: .now,configuration: .zbi)
+//    SimpleEntry(date: .now,configuration: .none)
+//    
+//
 }

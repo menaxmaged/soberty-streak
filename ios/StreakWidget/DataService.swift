@@ -53,19 +53,19 @@ struct DataService {
 //        }
 //    }
 
-    
-    // Function to add a new event
-    mutating func addEvent(name: String, date: Date, days: Int = 0) {
-        var updatedEvents = events
-        updatedEvents.append(Event(name: name, date: date))
-        self.events = updatedEvents
-    }
-    
-    // Function to remove an event
-    mutating func removeEvent(eventName: String) {
-        var updatedEvents = events.filter { $0.name != eventName }
-        self.events = updatedEvents
-    }
+//    
+//    // Function to add a new event
+//    mutating func addEvent(name: String, date: Date, days: Int = 0) {
+//        var updatedEvents = events
+//        updatedEvents.append(Event(name: name, date: date))
+//        self.events = updatedEvents
+//    }
+//    
+//    // Function to remove an event
+//    mutating func removeEvent(eventName: String) {
+//        var updatedEvents = events.filter { $0.name != eventName }
+//        self.events = updatedEvents
+//    }
     
     // Function to list all events
     func listEvents() -> [Event] {

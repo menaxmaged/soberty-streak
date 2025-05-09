@@ -41,7 +41,8 @@ struct SmallWidgetView: View {
     var body: some View {
 
         VStack(alignment: .leading, spacing: 10) {
-            WidgetComponents.NameView(name: event.name)
+            WidgetComponents.NameView(name: event.name)                .minimumScaleFactor(0.5)
+
             WidgetComponents.DaysCounter(days: event.days)
             WidgetComponents.StartDate(date: event.formattedDate)
             WidgetComponents.MonthStreak(days: event.days)
@@ -52,30 +53,64 @@ struct SmallWidgetView: View {
     }
 }
 
+
 struct MediumWidgetView: View {
     var eventList: [Event]
     let columns = [
-        GridItem(.flexible()),
-        GridItem(.flexible())
+        GridItem(.flexible(), spacing: 10),
+        GridItem(.flexible(), spacing: 10)
     ]
 
     var body: some View {
         GeometryReader { geometry in
-                    LazyVGrid(columns: columns, spacing: geometry.size.height * 0.05) {
-                        ForEach(eventList) { event in
-                            VStack(alignment: .leading){
-                                WidgetComponents.NameView(name: event.name)
-                                WidgetComponents.DaysCounter(days: event.days)
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        }
+            LazyVGrid(columns: columns, spacing: 3) {
+                ForEach(Array(eventList.enumerated()), id: \.element.id) { index, event in
+                                       VStack(alignment: .leading, spacing: 5) {
+                                           WidgetComponents.NameView(name: event.name)
+                                               .font(.system(size: 16))
+                                               .lineLimit(1)
+                                               .minimumScaleFactor(0.8)
+                                               .frame(maxWidth: .infinity, alignment: .leading)
+                                           
+                                           WidgetComponents.DaysCounter(days: event.days)
+                                               .font(.system(size: 24, weight: .bold))
+                                               .frame(maxWidth: .infinity, alignment: .leading)
+                                           
+                                           // Add a Divider if it's not the last item
+                                           if index < eventList.count - 1 {
+                                               Divider()
+                                                   .background(Color.gray.opacity(0.4))
+                                                   .padding(.vertical, 5)
+                                           }
+                                       }
+                                       .padding(.vertical, 8)
+                                       .padding(.horizontal, 8)
+                                       .background(Color(.systemGray6))
+                                       .cornerRadius(10)
+                                   }
+                               }
+                               .padding(.horizontal, 10)
+                               .frame(width: geometry.size.width, height: geometry.size.height)
+                ForEach(eventList) { event in
+                    VStack(alignment: .leading, spacing: 5) {
+                        WidgetComponents.NameView(name: event.name)
+                            .minimumScaleFactor(0.5)
+                            
+                                               WidgetComponents.DaysCounter(days: event.days)
+                            .font(.system(size: 24, weight: .bold))
+                            .minimumScaleFactor(0.5)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .padding(.horizontal, 10)
-                    .padding(.vertical, 10)
-                    .frame(maxWidth: geometry.size.width, maxHeight: geometry.size.height, alignment: .center)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
+            }
+            .padding(.horizontal, 10)
+            .padding(.vertical, 20)
+            .frame(width: geometry.size.width, height: geometry.size.height)
+        }
     }
 }
+
 struct LargeWidgetView: View {
     var event: Event
 
