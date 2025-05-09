@@ -1,4 +1,3 @@
-import 'dart:ffi';
 
 import 'package:flutter/cupertino.dart';
 import 'package:home_widget/home_widget.dart';
@@ -14,7 +13,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   int streakDays = 0;
   String appGroupId = "group.net.codexeg.sobertyStreak";
   String iosWidgetName = "StreakWidget";
-  String dataKey = "streakCount";
+  String dataKey = "streak";
 
   void incrementStreak() async {
     setState(() {
