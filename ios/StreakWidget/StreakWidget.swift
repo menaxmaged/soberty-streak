@@ -53,8 +53,8 @@ struct StreakWidgetEntryView : View {
             
             
             
-            StreakView(days: 55)
-            MonthStreak(days: 55)
+            StreakView(days: 60)
+            MonthStreak(days: 60)
      
         }.foregroundStyle(.red)
             }
