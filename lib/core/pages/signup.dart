@@ -1,0 +1,116 @@
+import '/core/utils/helper.dart';
+
+class Signup extends StatefulWidget {
+  const Signup({super.key});
+
+  @override
+  State<Signup> createState() => _SignupState();
+}
+
+class _SignupState extends State<Signup> {
+  @override
+  Widget build(BuildContext context) {
+    TextEditingController username = TextEditingController();
+    TextEditingController password = TextEditingController();
+
+    return CupertinoPageScaffold(
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0), // Padding for the screen
+          child: SingleChildScrollView(
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Hero(
+                    tag: "logo",
+                    child: Image(
+                      image: AssetImage("assets/images/logo.png"),
+                      height: 200,
+                      width: 250,
+                    ),
+                  ),
+                  SizedBox(
+                    height: 40,
+                  ), // Adds space between the logo and other elements
+                  CupertinoTextField(
+                    placeholder: 'Username',
+                    controller: username,
+                    padding: const EdgeInsets.all(16.0),
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.systemGrey5,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ), // Adds space between the text field and the button
+                  CupertinoTextField(
+                    placeholder: 'Password',
+                    controller: password,
+                    padding: const EdgeInsets.all(16.0),
+                    obscureText: true,
+                    decoration: BoxDecoration(
+                      color: CupertinoColors.systemGrey5,
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 16,
+                  ), // Adds space between the text field and the button
+                  SizedBox(
+                    width: double.infinity,
+                    child: CupertinoButton.filled(
+                      onPressed: () async {
+                        // Handle login action
+
+                        // Call the login function
+                        var result = await signup(username.text, password.text);
+
+                        // Check if login was successful
+                        if (result == true) {
+                          // Navigate to the next page on success
+                          Navigator.pushReplacement(
+                            context,
+                            CupertinoPageRoute(
+                              builder: (context) => const Login(),
+                            ),
+                          );
+                        } else {
+                          // Display error message
+                          showCupertinoDialog(
+                            context: context,
+                            builder:
+                                (context) => CupertinoAlertDialog(
+                                  title: const Text('Sign up Failed'),
+                                  content: Text(result),
+                                  actions: [
+                                    CupertinoDialogAction(
+                                      child: const Text('OK'),
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                    ),
+                                  ],
+                                ),
+                          );
+                        }
+                      },
+                      child: const Text(
+                        'Sign up',
+                        style: TextStyle(
+                          color: CupertinoColors.white,
+                          fontSize: 18,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
