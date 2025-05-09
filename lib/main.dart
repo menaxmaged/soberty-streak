@@ -19,6 +19,13 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoApp(title: appName, home: SplashScreen());
+    return CupertinoApp(
+      title: appName,
+      home: SplashScreen(),
+      theme: CupertinoThemeData(
+        brightness: Brightness.dark,
+        primaryColor: CupertinoColors.systemRed,
+      ),
+    );
   }
 }

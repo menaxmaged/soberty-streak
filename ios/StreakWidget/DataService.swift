@@ -10,7 +10,7 @@ import SwiftUI
 
 
 struct DataService{
-    @AppStorage("streak",store: UserDefaults(suiteName: "group.net.codexeg.SobertyStreak")) private var streak = 0
+    @AppStorage("streakCount",store: UserDefaults(suiteName: "group.net.codexeg.sobertyStreak")) private var streak = 0
     
     
     

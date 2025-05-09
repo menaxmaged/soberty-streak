@@ -8,13 +8,15 @@
 import WidgetKit
 import SwiftUI
 
+
+let data = DataService();
 struct Provider: AppIntentTimelineProvider {
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), days: 0)
+        SimpleEntry(date: Date(), days: data.progress())
     }
 
     func snapshot(for configuration: ConfigurationAppIntent, in context: Context) async -> SimpleEntry {
-        SimpleEntry(date: Date(), days: 60)
+        SimpleEntry(date: Date(), days: data.progress())
     }
     
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
@@ -24,7 +26,7 @@ struct Provider: AppIntentTimelineProvider {
         let currentDate = Date()
         for hourOffset in 0 ..< 5 {
             let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, days: 55)
+            let entry = SimpleEntry(date: entryDate, days: data.progress())
             entries.append(entry)
         }
 
@@ -53,8 +55,8 @@ struct StreakWidgetEntryView : View {
             
             
             
-            StreakView(days: 60)
-            MonthStreak(days: 60)
+            StreakView(days: data.progress())
+            MonthStreak(days: data.progress())
      
         }.foregroundStyle(.red)
             }
