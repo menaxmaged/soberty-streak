@@ -26,6 +26,6 @@ class MainApp extends StatelessWidget {
         brightness: Brightness.dark,
         primaryColor: CupertinoColors.systemRed,
       ),
-    );
+    );  
   }
 }

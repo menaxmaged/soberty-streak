@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       String eventsJson = jsonEncode(events);
       print(eventsJson);
       // Save the JSON string to the widget using HomeWidget
-      await HomeWidget.saveWidgetData('events_data', eventsJson);
+      await HomeWidget.saveWidgetData('event_data', eventsJson);
 
       // Update the widget immediately (optional)
       await HomeWidget.updateWidget(
@@ -49,6 +49,14 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     });
 
     await HomeWidget.saveWidgetData(dataKey, streakDays);
+    await HomeWidget.updateWidget(
+      iOSName: iosWidgetName,
+      androidName: iosWidgetName,
+    );
+  }
+
+  void changeName() async {
+    await HomeWidget.saveWidgetData("username", 'Menaaaaa');
     await HomeWidget.updateWidget(
       iOSName: iosWidgetName,
       androidName: iosWidgetName,
@@ -106,6 +114,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   onPressed: incrementStreak,
                   child: Text('Increment Streak'),
                 ),
+                CupertinoButton(
+                  onPressed: changeName,
+                  child: Text('Change Name'),
+                ),
+
                 CupertinoButton(
                   onPressed: pushEventsToWidget, // ✅ Fixed: Correct syntax
                   child: Text('Push Events to Widget'), // ✅ Updated label

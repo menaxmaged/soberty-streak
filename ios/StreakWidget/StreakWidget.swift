@@ -9,12 +9,13 @@ import WidgetKit
 import SwiftUI
 
 
-var dataService = DataService();
-let eventList: [Event] = dataService.listEvents()
+// Initialize the data service
+let dataService = DataServiceNew()
 
 
+// Provider
 struct Provider: AppIntentTimelineProvider {
-    
+
     func placeholder(in context: Context) -> SimpleEntry {
         SimpleEntry(date: Date(),configuration: ConfigurationAppIntent())
     }
@@ -24,15 +25,21 @@ struct Provider: AppIntentTimelineProvider {
     }
     
     func timeline(for configuration: ConfigurationAppIntent, in context: Context) async -> Timeline<SimpleEntry> {
-        var entries: [SimpleEntry] = []
-
-        // Generate a timeline consisting of five entries an hour apart, starting from the current date.
-        let currentDate = Date()
-        for hourOffset in 0 ..< 5 {
-            let entryDate = Calendar.current.date(byAdding: .hour, value: hourOffset, to: currentDate)!
-            let entry = SimpleEntry(date: entryDate, configuration: configuration)
-            entries.append(entry)
+        
+        
+        var event:Event = Event.defaultEvent
+        
+        // Safely unwrap the tuple returned by loadData()
+        if configuration.selectedEvent != nil{
+             event = dataService.getEvent(eventName: configuration.selectedEvent! )
         }
+        
+        
+        // Define the timeline for the widget with the unwrapped data
+        let entries: [SimpleEntry] = [
+            SimpleEntry(date: Date(), configuration: configuration, eventData: dataService.loadEventData(), event: event )
+        ]
+
 
         return Timeline(entries: entries, policy: .atEnd)
     }
@@ -42,62 +49,67 @@ struct Provider: AppIntentTimelineProvider {
 //    }
 }
 
+
+// Simple Entry
 struct SimpleEntry: TimelineEntry {
     let date: Date
     let configuration: ConfigurationAppIntent 
+    var userInfo: String = "" // This will hold the data you want to display in the widget
+    var eventData: String = ""
+    var event: Event = Event(name: "EVENT", dateString: "2025-05-6")
+    var eventList: [Event] = []
+}
 
+// Widget View
+struct StreakWidgetEntryView: View {
+    var entry: Provider.Entry
+    
+    
+    
+    
+    var currentEvent: Event 
+    @Environment(\.widgetFamily) var family // Detect the widget size
+    
+    
+    var body: some View {
+        if entry.configuration.selectedEvent != nil {
+            // Use the selected event
+            VStack {
+                switch family {
+                case .accessoryCircular:
+                    AccessoryWidgetView(event: currentEvent)
+
+                case .accessoryRectangular:
+                    AccessoryWidgetRectView(event: currentEvent)
+
+                case .systemSmall:
+                    SmallWidgetView(event: currentEvent)
+                case .systemMedium:
+                 //   MediumWidgetView(eventList: eventList)
+                    Text("SSS").foregroundStyle(.cyan)
+                case .systemLarge:
+                    LargeWidgetView(event: currentEvent)
+                default:
+                    SmallWidgetView(event: currentEvent)
+                }
+            }.foregroundStyle(.green)
+        } else {
+            Text("No event selected")
+                .font(.headline).foregroundStyle(.white)
+        }
+    }
 }
 
 
 
-struct StreakWidgetEntryView: View {
-    var entry: Provider.Entry
-    @Environment(\.widgetFamily) var family // Detect the widget size
-    
-    var body: some View {
-        
-        if let selectedEvent = entry.configuration.selectedEvent {
-            let event = dataService.getEvent(eventname: selectedEvent)
-            
-            Text(dataService.getEventsData() ?? "AA").foregroundStyle(.yellow)
-
-            VStack{
-                switch family {
-                case .accessoryCircular:
-                    AccessoryWidgetView(event: event)
-                case .accessoryRectangular:
-                    AccessoryWidgetRectView(event: event)
-                    
-                case .systemSmall:
-                    SmallWidgetView(event: event)
-                case .systemMedium:
-                    MediumWidgetView(eventList: eventList)
-                case .systemLarge:
-                    LargeWidgetView(event: event)
-                default:
-                    SmallWidgetView(event: event)
-                }
-            }.foregroundStyle(.green)
-        
-            
-            
-            
-            
-            
-        }
-        else {
-                Text("No event selected")
-                    .font(.headline).foregroundStyle(.white)
-            }
-        }}
-    
 
 
 
+// Widget Init
 struct StreakWidget: Widget {
     let kind: String = "StreakWidget"
-
     var body: some WidgetConfiguration {
+        
         AppIntentConfiguration(kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()) { entry in
             StreakWidgetEntryView(entry: entry)
                 .containerBackground(.black, for: .widget)
@@ -106,6 +118,11 @@ struct StreakWidget: Widget {
     }
 }
 
+
+
+
+
+// For Preview
 extension ConfigurationAppIntent {
     fileprivate static var nn: ConfigurationAppIntent {
         let intent = ConfigurationAppIntent()
@@ -113,14 +130,14 @@ extension ConfigurationAppIntent {
         return intent
     }
     
-    fileprivate static var zbi: ConfigurationAppIntent {
+    fileprivate static var end: ConfigurationAppIntent {
         let intent = ConfigurationAppIntent()
-        intent.selectedEvent = "End of An Era"
+        intent.selectedEvent = "End of an Era"
 
         return intent
     }
     
-    fileprivate static var end: ConfigurationAppIntent {
+    fileprivate static var zbi: ConfigurationAppIntent {
         let intent = ConfigurationAppIntent()
         intent.selectedEvent = "AAAA"
         return intent

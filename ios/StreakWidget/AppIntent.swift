@@ -30,9 +30,7 @@ struct ConfigurationAppIntent: WidgetConfigurationIntent {
     
     private struct EventsOptionsProvider: DynamicOptionsProvider{
         func results() async throws -> [String] {
-            dataService.getEvents()
-            
-        }
+            dataService.getEventNames()        }
         
         
         
@@ -40,3 +38,5 @@ struct ConfigurationAppIntent: WidgetConfigurationIntent {
     
     
 }
+
+

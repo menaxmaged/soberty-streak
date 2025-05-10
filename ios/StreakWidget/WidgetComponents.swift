@@ -45,7 +45,8 @@ struct WidgetComponents {
                             let index = row * columns + col
                             let isFilled = index <= days / 30
                             Rectangle().frame(height: 8).foregroundStyle(
-                                isFilled ? .primary : .secondary)
+                                isFilled ? .primary : .secondary)            .cornerRadius(25) // Set corner radius
+
                         }
                     }
                 }
