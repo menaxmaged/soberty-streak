@@ -64,36 +64,10 @@ struct MediumWidgetView: View {
     var body: some View {
         GeometryReader { geometry in
             LazyVGrid(columns: columns, spacing: 3) {
-                ForEach(Array(eventList.enumerated()), id: \.element.id) { index, event in
-                                       VStack(alignment: .leading, spacing: 5) {
-                                           WidgetComponents.NameView(name: event.name)
-                                               .font(.system(size: 16))
-                                               .lineLimit(1)
-                                               .minimumScaleFactor(0.8)
-                                               .frame(maxWidth: .infinity, alignment: .leading)
-                                           
-                                           WidgetComponents.DaysCounter(days: event.days)
-                                               .font(.system(size: 24, weight: .bold))
-                                               .frame(maxWidth: .infinity, alignment: .leading)
-                                           
-                                           // Add a Divider if it's not the last item
-                                           if index < eventList.count - 1 {
-                                               Divider()
-                                                   .background(Color.gray.opacity(0.4))
-                                                   .padding(.vertical, 5)
-                                           }
-                                       }
-                                       .padding(.vertical, 8)
-                                       .padding(.horizontal, 8)
-                                       .background(Color(.systemGray6))
-                                       .cornerRadius(10)
-                                   }
-                               }
-                               .padding(.horizontal, 10)
-                               .frame(width: geometry.size.width, height: geometry.size.height)
                 ForEach(eventList) { event in
                     VStack(alignment: .leading, spacing: 5) {
                         WidgetComponents.NameView(name: event.name)
+//                            .font(.headline)
                             .minimumScaleFactor(0.5)
                             
                                                WidgetComponents.DaysCounter(days: event.days)
@@ -111,6 +85,13 @@ struct MediumWidgetView: View {
     }
 }
 
+
+
+
+
+
+
+
 struct LargeWidgetView: View {
     var event: Event
 
@@ -118,3 +99,9 @@ struct LargeWidgetView: View {
     }
 
 }
+
+
+
+
+
+

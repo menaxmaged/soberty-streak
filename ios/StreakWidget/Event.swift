@@ -7,6 +7,7 @@
 
 import Foundation
 
+
 struct Event: Identifiable, Codable ,Hashable{
     var id = UUID() // Unique identifier for each event
     var name: String
