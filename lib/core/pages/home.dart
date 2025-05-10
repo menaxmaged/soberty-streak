@@ -19,7 +19,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     try {
       // Your predefined list of events
       List<Map<String, dynamic>> events = [
-        {"name": "End of an Era", "dateString": "2023-03-14"},
+        {"name": "Zbi", "dateString": "2023-03-14"},
         {"name": "No Contact", "date": "2023-03-16"},
         {"name": "Sobriety Journey", "date": "2023-05-14"},
         {"name": "nn", "date": "2025-03-01"},
@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       String eventsJson = jsonEncode(events);
       print(eventsJson);
       // Save the JSON string to the widget using HomeWidget
-      await HomeWidget.saveWidgetData('event_data', eventsJson);
+      await HomeWidget.saveWidgetData('events_data', eventsJson);
 
       // Update the widget immediately (optional)
       await HomeWidget.updateWidget(
