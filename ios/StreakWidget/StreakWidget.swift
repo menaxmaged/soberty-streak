@@ -10,8 +10,8 @@ import SwiftUI
 
 
 var dataService = DataService();
-let currentEvent: Event = dataService.getEvent(eventname: "nn")
 let eventList: [Event] = dataService.listEvents()
+
 
 struct Provider: AppIntentTimelineProvider {
     
@@ -44,7 +44,7 @@ struct Provider: AppIntentTimelineProvider {
 
 struct SimpleEntry: TimelineEntry {
     let date: Date
-    let configuration: ConfigurationAppIntent
+    let configuration: ConfigurationAppIntent 
 
 }
 
@@ -59,7 +59,8 @@ struct StreakWidgetEntryView: View {
         if let selectedEvent = entry.configuration.selectedEvent {
             let event = dataService.getEvent(eventname: selectedEvent)
             
-            
+            Text(dataService.getEventsData() ?? "AA").foregroundStyle(.yellow)
+
             VStack{
                 switch family {
                 case .accessoryCircular:

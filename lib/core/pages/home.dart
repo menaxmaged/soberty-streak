@@ -1,4 +1,4 @@
-
+import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:home_widget/home_widget.dart';
 
@@ -14,6 +14,34 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   String appGroupId = "group.net.codexeg.sobertyStreak";
   String iosWidgetName = "StreakWidget";
   String dataKey = "streak";
+
+  Future<void> pushEventsToWidget() async {
+    try {
+      // Your predefined list of events
+      List<Map<String, dynamic>> events = [
+        {"name": "End of an Era", "dateString": "2023-03-14"},
+        {"name": "No Contact", "date": "2023-03-16"},
+        {"name": "Sobriety Journey", "date": "2023-05-14"},
+        {"name": "nn", "date": "2025-03-01"},
+      ];
+
+      // Convert the events list to JSON string
+      String eventsJson = jsonEncode(events);
+      print(eventsJson);
+      // Save the JSON string to the widget using HomeWidget
+      await HomeWidget.saveWidgetData('events_data', eventsJson);
+
+      // Update the widget immediately (optional)
+      await HomeWidget.updateWidget(
+        name: 'StreakWidget', // Your widget name
+        iOSName: 'StreakWidget', // Your widget's iOS name
+      );
+
+      print("Events pushed to Widget successfully.");
+    } catch (e) {
+      print("Failed to push events to Widget: $e");
+    }
+  }
 
   void incrementStreak() async {
     setState(() {
@@ -42,7 +70,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     HomeWidget.setAppGroupId(appGroupId);
-
     WidgetsBinding.instance.addObserver(this);
   }
 
@@ -78,6 +105,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 CupertinoButton(
                   onPressed: incrementStreak,
                   child: Text('Increment Streak'),
+                ),
+                CupertinoButton(
+                  onPressed: pushEventsToWidget, // ✅ Fixed: Correct syntax
+                  child: Text('Push Events to Widget'), // ✅ Updated label
                 ),
                 CupertinoButton.tinted(
                   onPressed: resetStreak,
