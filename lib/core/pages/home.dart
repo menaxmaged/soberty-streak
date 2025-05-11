@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:home_widget/home_widget.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -10,125 +11,183 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
-  int streakDays = 0;
   String appGroupId = "group.net.codexeg.sobertyStreak";
   String iosWidgetName = "StreakWidget";
-  String dataKey = "streak";
-
-  Future<void> pushEventsToWidget() async {
-    try {
-      // Your predefined list of events
-      List<Map<String, dynamic>> events = [
-        {"name": "Zbi", "dateString": "2023-03-14"},
-        {"name": "No Contact", "date": "2023-03-16"},
-        {"name": "Sobriety Journey", "date": "2023-05-14"},
-        {"name": "nn", "date": "2025-03-01"},
-      ];
-
-      // Convert the events list to JSON string
-      String eventsJson = jsonEncode(events);
-      print(eventsJson);
-      // Save the JSON string to the widget using HomeWidget
-      await HomeWidget.saveWidgetData('events_data', eventsJson);
-
-      // Update the widget immediately (optional)
-      await HomeWidget.updateWidget(
-        name: 'StreakWidget', // Your widget name
-        iOSName: 'StreakWidget', // Your widget's iOS name
-      );
-
-      print("Events pushed to Widget successfully.");
-    } catch (e) {
-      print("Failed to push events to Widget: $e");
-    }
-  }
-
-  void incrementStreak() async {
-    setState(() {
-      streakDays++;
-    });
-
-    await HomeWidget.saveWidgetData(dataKey, streakDays);
-    await HomeWidget.updateWidget(
-      iOSName: iosWidgetName,
-      androidName: iosWidgetName,
-    );
-  }
-
-  void changeName() async {
-    await HomeWidget.saveWidgetData("username", 'Menaaaaa');
-    await HomeWidget.updateWidget(
-      iOSName: iosWidgetName,
-      androidName: iosWidgetName,
-    );
-  }
-
-  void resetStreak() async {
-    setState(() {
-      streakDays = 0;
-    });
-    await HomeWidget.saveWidgetData(dataKey, 0);
-    await HomeWidget.updateWidget(
-      iOSName: iosWidgetName,
-      androidName: iosWidgetName,
-    );
-  }
+  String eventsDataKey = "events_data";
+  List<Map<String, dynamic>> eventsList = [];
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController dateController = TextEditingController();
+  final DateFormat dateFormat = DateFormat('yyyy-MM-dd');
 
   @override
   void initState() {
     super.initState();
     HomeWidget.setAppGroupId(appGroupId);
     WidgetsBinding.instance.addObserver(this);
+    loadEvents();
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    nameController.dispose();
+    dateController.dispose();
     super.dispose();
   }
 
+  /// Load Events from Widget Data
+  Future<void> loadEvents() async {
+    final eventsJson = await HomeWidget.getWidgetData<String>(eventsDataKey);
+    if (eventsJson != null) {
+      setState(() {
+        try {
+          eventsList = List<Map<String, dynamic>>.from(jsonDecode(eventsJson));
+        } catch (e) {
+          print("Error decoding events JSON: $e");
+          eventsList = [];
+        }
+      });
+    }
+  }
+
+  /// Add Event Manually
+  void addEvent() {
+    if (nameController.text.trim().isEmpty) {
+      print("Event name cannot be empty.");
+      return;
+    }
+
+    try {
+      // Validate and format the date
+      DateTime eventDate = dateFormat.parse(dateController.text.trim());
+      String formattedDate = dateFormat.format(eventDate);
+
+      final newEvent = {
+        "name": nameController.text.trim(),
+        "dateString": formattedDate,
+      };
+
+      setState(() {
+        eventsList.add(newEvent);
+      });
+
+      print("Event added: $newEvent");
+      pushEventsToWidget();
+      nameController.clear();
+      dateController.clear();
+    } catch (e) {
+      print("Invalid date format. Please use YYYY-MM-DD.");
+    }
+  }
+
+  /// Push Events Data to Widget
+  Future<void> pushEventsToWidget() async {
+    try {
+      String eventsJson = jsonEncode(eventsList);
+      print("Events JSON: $eventsJson");
+
+      await HomeWidget.saveWidgetData(eventsDataKey, eventsJson);
+
+      await HomeWidget.updateWidget(
+        name: iosWidgetName,
+        iOSName: iosWidgetName,
+      );
+
+      print("Events pushed to Widget successfully.");
+    } catch (e) {
+      print("Error pushing events to Widget: $e");
+    }
+  }
+
+  /// Reset Events Data
+  Future<void> resetEvents() async {
+    setState(() {
+      eventsList.clear();
+    });
+
+    await HomeWidget.saveWidgetData(eventsDataKey, jsonEncode([]));
+    await HomeWidget.updateWidget(name: iosWidgetName, iOSName: iosWidgetName);
+    print("Events reset successfully.");
+  }
+
+  /// Delete a Specific Event
+  void deleteEvent(int index) {
+    setState(() {
+      eventsList.removeAt(index);
+    });
+    pushEventsToWidget();
+    print("Event deleted at index $index");
+  }
+
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {}
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      loadEvents();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar.large(
-        largeTitle: Text("Soberty Streak"),
+      navigationBar: const CupertinoNavigationBar(
+        middle: Text("Soberty Events"),
       ),
       child: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text('Your Soberty Streak:', style: TextStyle(fontSize: 24)),
-                SizedBox(height: 20),
-                Text(
-                  '$streakDays Days',
-                  style: TextStyle(fontSize: 40, fontWeight: FontWeight.bold),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Text(
+                'Manage Your Soberty Events:',
+                style: TextStyle(fontSize: 24),
+              ),
+              SizedBox(height: 20),
+              CupertinoTextField(
+                controller: nameController,
+                placeholder: "Event Name",
+              ),
+              SizedBox(height: 10),
+              CupertinoTextField(
+                controller: dateController,
+                placeholder: "Event Date (YYYY-MM-DD)",
+                keyboardType: TextInputType.datetime,
+              ),
+              SizedBox(height: 10),
+              CupertinoButton.filled(
+                onPressed: addEvent,
+                child: Text('Add Event'),
+              ),
+              SizedBox(height: 20),
+              CupertinoButton.filled(
+                onPressed: pushEventsToWidget,
+                child: Text('Push Events to Widget'),
+              ),
+              CupertinoButton(
+                onPressed: resetEvents,
+                child: Text('Reset Events'),
+              ),
+              SizedBox(height: 20),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: eventsList.length,
+                  itemBuilder: (context, index) {
+                    final event = eventsList[index];
+                    return CupertinoListTile(
+                      title: Text(event['name']),
+                      subtitle: Text(event['dateString']),
+                      trailing: CupertinoButton(
+                        child: Icon(
+                          CupertinoIcons.delete,
+                          color: CupertinoColors.destructiveRed,
+                        ),
+                        onPressed: () => deleteEvent(index),
+                      ),
+                    );
+                  },
                 ),
-                SizedBox(height: 20),
-                CupertinoButton(
-                  onPressed: incrementStreak,
-                  child: Text('Increment Streak'),
-                ),
-                CupertinoButton(
-                  onPressed: changeName,
-                  child: Text('Change Name'),
-                ),
-
-                CupertinoButton(
-                  onPressed: pushEventsToWidget, // ✅ Fixed: Correct syntax
-                  child: Text('Push Events to Widget'), // ✅ Updated label
-                ),
-                CupertinoButton.tinted(
-                  onPressed: resetStreak,
-                  child: Text('Reset Streak'),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

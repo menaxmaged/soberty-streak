@@ -95,24 +95,4 @@ struct Event: Identifiable, Codable ,Hashable{
     
 }
 
-// decodeEvents function
-func decodeEvents(from jsonString: String) -> [Event] {
-    var events: [Event] = []
-
-    // Convert the JSON string to Data
-    if let jsonData = jsonString.data(using: .utf8) {
-        do {
-            // Decode the JSON using JSONDecoder
-            let decoder = JSONDecoder()
-            events = try decoder.decode([Event].self, from: jsonData)
-        } catch {
-            print("Error decoding JSON: \(error)")
-        }
-    } else {
-        print("Invalid JSON data.")
-    }
-
-    return events
-}
-
 
