@@ -72,7 +72,8 @@ struct MediumWidgetView: View {
                             .font(.system(size: 24, weight: .bold))
                             .minimumScaleFactor(0.5)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                    }
+                    }.foregroundStyle(argbToBuiltInColor(argb: event.color))
+
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
