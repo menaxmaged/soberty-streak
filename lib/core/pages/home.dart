@@ -1,7 +1,4 @@
-import 'dart:convert';
-import 'package:flutter/cupertino.dart';
-import 'package:home_widget/home_widget.dart';
-import 'package:intl/intl.dart';
+import '/core/utils/helper.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -11,14 +8,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
-  String appGroupId = "group.net.codexeg.sobertyStreak";
-  String iosWidgetName = "StreakWidget";
-  String eventsDataKey = "events_data";
-  List<Map<String, dynamic>> eventsList = [];
-  final TextEditingController nameController = TextEditingController();
-  final TextEditingController dateController = TextEditingController();
-  final DateFormat dateFormat = DateFormat('yyyy-MM-dd');
-
   @override
   void initState() {
     super.initState();
@@ -30,8 +19,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    nameController.dispose();
-    dateController.dispose();
     super.dispose();
   }
 
@@ -40,43 +27,24 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final eventsJson = await HomeWidget.getWidgetData<String>(eventsDataKey);
     if (eventsJson != null) {
       setState(() {
-        try {
-          eventsList = List<Map<String, dynamic>>.from(jsonDecode(eventsJson));
-        } catch (e) {
-          print("Error decoding events JSON: $e");
-          eventsList = [];
-        }
+        eventsList = List<Map<String, dynamic>>.from(jsonDecode(eventsJson));
       });
     }
   }
 
   /// Add Event Manually
-  void addEvent() {
-    if (nameController.text.trim().isEmpty) {
-      print("Event name cannot be empty.");
-      return;
-    }
-
+  void addEvent(event) {
     try {
-      // Validate and format the date
-      DateTime eventDate = dateFormat.parse(dateController.text.trim());
+      DateTime eventDate = dateFormat.parse(event.date);
       String formattedDate = dateFormat.format(eventDate);
 
-      final newEvent = {
-        "name": nameController.text.trim(),
-        "dateString": formattedDate,
-      };
-
+      final newEvent = {'name': event.name, 'dateString': formattedDate};
       setState(() {
-        eventsList.add(newEvent);
+        //        eventsList.add(newEvent);
       });
-
-      print("Event added: $newEvent");
-      pushEventsToWidget();
-      nameController.clear();
-      dateController.clear();
+      //      pushEventsToWidget();
     } catch (e) {
-      print("Invalid date format. Please use YYYY-MM-DD.");
+      print("Error: Invalid date format.");
     }
   }
 
@@ -84,16 +52,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   Future<void> pushEventsToWidget() async {
     try {
       String eventsJson = jsonEncode(eventsList);
-      print("Events JSON: $eventsJson");
-
       await HomeWidget.saveWidgetData(eventsDataKey, eventsJson);
-
-      await HomeWidget.updateWidget(
-        name: iosWidgetName,
-        iOSName: iosWidgetName,
-      );
-
-      print("Events pushed to Widget successfully.");
+      await HomeWidget.updateWidget(name: iosWidgetName);
+      // Optionally show a success snackbar or feedback message
     } catch (e) {
       print("Error pushing events to Widget: $e");
     }
@@ -104,89 +65,96 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     setState(() {
       eventsList.clear();
     });
-
     await HomeWidget.saveWidgetData(eventsDataKey, jsonEncode([]));
     await HomeWidget.updateWidget(name: iosWidgetName, iOSName: iosWidgetName);
     print("Events reset successfully.");
   }
 
-  /// Delete a Specific Event
-  void deleteEvent(int index) {
-    setState(() {
-      eventsList.removeAt(index);
-    });
-    pushEventsToWidget();
-    print("Event deleted at index $index");
-  }
-
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      loadEvents();
-    }
+  void didChangeAppLifecycleState(AppLifecycleState state) {}
+
+  // Show Add Event
+  void _showAddEvent() {
+    showCupertinoModalPopup(
+      context: context,
+      builder:
+          (context) => Container(
+            padding: const EdgeInsets.only(top: 6.0),
+            margin: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            color: CupertinoColors.systemBackground.resolveFrom(context),
+            child: SafeArea(
+              top: false,
+              child: AddEventModal(
+                onEventAdded: (context) {
+                  print(context);
+                  setState(() {
+                    eventsList.add(context);
+                  });
+                  pushEventsToWidget();
+                  print("object");
+                },
+              ),
+            ),
+          ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text("Soberty Events"),
+      navigationBar: CupertinoNavigationBar.large(
+        largeTitle: Text("Soberty Events"),
+        trailing: IconButton(
+          onPressed: () {
+            _showAddEvent();
+          },
+          icon: Icon(CupertinoIcons.add_circled),
+        ),
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          padding: const EdgeInsets.symmetric(vertical: 60, horizontal: 16),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Text(
-                'Manage Your Soberty Events:',
-                style: TextStyle(fontSize: 24),
-              ),
               SizedBox(height: 20),
-              CupertinoTextField(
-                controller: nameController,
-                placeholder: "Event Name",
+
+              Expanded(
+                child:
+                    eventsList.isEmpty
+                        ? Center(child: Text("No events added"))
+                        : ListView.builder(
+                          itemCount: eventsList.length,
+                          itemBuilder: (context, index) {
+                            final event = eventsList[index];
+                            return CupertinoListTile(
+                              title: Text(event['name']),
+                              subtitle: Text(event['dateString'].toString()),
+                              trailing: CupertinoButton(
+                                child: Icon(
+                                  CupertinoIcons.delete,
+                                  color: CupertinoColors.destructiveRed,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    eventsList.removeAt(index);
+                                  });
+                                  pushEventsToWidget();
+                                },
+                              ),
+                            );
+                          },
+                        ),
               ),
-              SizedBox(height: 10),
-              CupertinoTextField(
-                controller: dateController,
-                placeholder: "Event Date (YYYY-MM-DD)",
-                keyboardType: TextInputType.datetime,
-              ),
-              SizedBox(height: 10),
-              CupertinoButton.filled(
-                onPressed: addEvent,
-                child: Text('Add Event'),
-              ),
+
               SizedBox(height: 20),
-              CupertinoButton.filled(
-                onPressed: pushEventsToWidget,
-                child: Text('Push Events to Widget'),
-              ),
               CupertinoButton(
                 onPressed: resetEvents,
                 child: Text('Reset Events'),
               ),
               SizedBox(height: 20),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: eventsList.length,
-                  itemBuilder: (context, index) {
-                    final event = eventsList[index];
-                    return CupertinoListTile(
-                      title: Text(event['name']),
-                      subtitle: Text(event['dateString']),
-                      trailing: CupertinoButton(
-                        child: Icon(
-                          CupertinoIcons.delete,
-                          color: CupertinoColors.destructiveRed,
-                        ),
-                        onPressed: () => deleteEvent(index),
-                      ),
-                    );
-                  },
-                ),
-              ),
             ],
           ),
         ),

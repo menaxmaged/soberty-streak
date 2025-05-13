@@ -6,7 +6,7 @@
 	<true/>
 	<key>com.apple.security.application-groups</key>
 	<array>
-		<string>group.net.codexeg.sobertyStreak</string>
+		<string>group.net.codexeg.sobertystreaker</string>
 	</array>
 </dict>
 </plist>

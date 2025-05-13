@@ -37,7 +37,7 @@ struct Provider: AppIntentTimelineProvider {
 
         // Define the timeline for the widget with the unwrapped data
         let entries: [SimpleEntry] = [
-            SimpleEntry(date: Date(), configuration: configuration, event: event)
+            SimpleEntry(date: Date(), configuration: configuration, event: event,eventList: dataService.loadEvents())
         ]
 
         return Timeline(entries: entries, policy: .atEnd)
@@ -59,13 +59,17 @@ struct StreakWidgetEntryView: View {
     var currentEvent: Event {
         entry.event
     }
+    // Computed property for eventList
+    var eventList: [Event] {
+        // Use the repeating initializer to return 4 copies of currentEvent
+        return Array(repeating: currentEvent, count: 4)
+    }
 
     @Environment(\.widgetFamily) var family  // Detect the widget size
 
     var body: some View {
         if entry.configuration.selectedEvent != nil {
             // Use the selected event
-
             VStack {
                 switch family {
                 case .accessoryCircular:
@@ -76,10 +80,10 @@ struct StreakWidgetEntryView: View {
 
                 case .systemSmall:
                     SmallWidgetView(event: currentEvent)
-                //                case .systemMedium:
-                //                    Text("SSS").foregroundStyle(.cyan) // Placeholder for system medium
-                //                case .systemLarge:
-                //                    LargeWidgetView(event: currentEvent)
+                case .systemMedium:
+                    MediumWidgetView(eventList: eventList)
+                case .systemLarge:
+                                    LargeWidgetView(event: currentEvent)
                 default:
                     SmallWidgetView(event: currentEvent)
                 }

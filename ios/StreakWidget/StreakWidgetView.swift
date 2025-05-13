@@ -64,13 +64,12 @@ struct MediumWidgetView: View {
     var body: some View {
         GeometryReader { geometry in
             LazyVGrid(columns: columns, spacing: 3) {
-                ForEach(eventList) { event in
+                ForEach(eventList, id: \.self) { event in // Fixed closure syntax here
                     VStack(alignment: .leading, spacing: 5) {
                         WidgetComponents.NameView(name: event.name)
-//                            .font(.headline)
                             .minimumScaleFactor(0.5)
                             
-                                               WidgetComponents.DaysCounter(days: event.days)
+                        WidgetComponents.DaysCounter(days: event.days)
                             .font(.system(size: 24, weight: .bold))
                             .minimumScaleFactor(0.5)
                             .frame(maxWidth: .infinity, alignment: .leading)
@@ -84,7 +83,6 @@ struct MediumWidgetView: View {
         }
     }
 }
-
 
 
 

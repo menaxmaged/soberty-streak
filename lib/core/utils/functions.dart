@@ -41,3 +41,13 @@ signup(username, password) async {
   //   return e.message; // Return Firebase error message
   // }
 }
+
+logError(String message, {String? name}) {
+  const red = '\x1B[38;5;196m';
+  const reset = '\x1B[0m';
+  log(
+    '$red⛔ $message$reset',
+    name: name ?? 'ErrorLogger',
+    time: DateTime.now(),
+  );
+}
