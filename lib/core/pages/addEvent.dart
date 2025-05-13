@@ -23,7 +23,7 @@ class _AddEventModalState extends State<AddEventModal> {
   void initState() {
     super.initState();
     newEvent = Event(
-      name: nameController.text.trim(),
+      name: "Event Name",
       dateString: DateFormat('yyyy-MM-dd').format(_startDate),
       color: _selectedColor.value,
     );
@@ -52,9 +52,7 @@ class _AddEventModalState extends State<AddEventModal> {
       return;
     }
 
-    widget.onEventAdded(
-      newEvent.toJson(),
-    ); // Correctly passing the Event object
+    widget.onEventAdded(newEvent.toJson()); // Pass the Event object as a Map
 
     Navigator.pop(context); // Close the modal after adding the event
   }
@@ -78,6 +76,10 @@ class _AddEventModalState extends State<AddEventModal> {
                 onDateTimeChanged: (DateTime newDate) {
                   setState(() {
                     _startDate = newDate;
+                    // Update the event's date when the date is changed
+                    newEvent.dateString = DateFormat(
+                      'yyyy-MM-dd',
+                    ).format(_startDate);
                   });
                 },
               ),
@@ -124,6 +126,8 @@ class _AddEventModalState extends State<AddEventModal> {
                           onTap: () {
                             setState(() {
                               _selectedColor = color;
+                              // Update the event's color when the color is changed
+                              newEvent.color = _selectedColor.value;
                             });
                             Navigator.pop(context); // Close the color picker
                           },
@@ -212,14 +216,20 @@ class _AddEventModalState extends State<AddEventModal> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                widgetPreview(newEvent, 0),
+                widgetPreview(newEvent), // Pass updated event to the preview
                 CupertinoTextField(
+                  onChanged: (value) {
+                    setState(() {
+                      newEvent.name = nameController.text.trim();
+                    });
+                  },
                   controller: nameController,
                   placeholder: "Event Name",
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10,
                     vertical: 16,
                   ),
+
                   style: const TextStyle(color: CupertinoColors.white),
                   placeholderStyle: const TextStyle(
                     color: CupertinoColors.systemGrey,
@@ -334,7 +344,26 @@ class _AddEventModalState extends State<AddEventModal> {
   }
 }
 
-Widget widgetPreview(Event event, int daysRemaining) {
+Widget widgetPreview(Event event) {
+  // Parse the event date from event.dateString
+  DateTime eventDate = DateFormat('yyyy-MM-dd').parse(event.dateString);
+
+  // Calculate the difference between eventDate and the current date
+  DateTime currentDate = DateTime.now();
+  int daysSince = currentDate.difference(eventDate).inDays;
+
+  // Handle negative daysSince (in case the event date is in the future)
+  if (daysSince < 0) {
+    daysSince = 0; // Or you can display something like "Event yet to happen"
+  }
+
+  // Convert the event color from int to Color
+  Color eventColor = Color(event.color);
+
+  // Calculate the number of months that have passed
+  int monthsSince = (daysSince / 30).floor();
+  if (monthsSince > 12) monthsSince = 12; // Limit to 12 months
+
   return Container(
     padding: const EdgeInsets.all(16.0),
     decoration: BoxDecoration(
@@ -343,11 +372,12 @@ Widget widgetPreview(Event event, int daysRemaining) {
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           event.name.isEmpty ? 'End of An Era' : event.name,
-          style: const TextStyle(
-            color: Color(0xFF32CD32),
+          style: TextStyle(
+            color: eventColor, // Use the event's color for text
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -356,43 +386,78 @@ Widget widgetPreview(Event event, int daysRemaining) {
         Row(
           children: [
             Text(
-              '$daysRemaining ',
-              style: const TextStyle(
-                color: Color(0xFF32CD32),
+              '$daysSince ',
+              style: TextStyle(
+                color: eventColor, // Use the event's color for days since text
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
               ),
             ),
             const Text(
-              'Days',
+              'Days Since',
               style: TextStyle(color: CupertinoColors.systemGrey, fontSize: 18),
             ),
           ],
         ),
         const SizedBox(height: 8),
         Text(
-          'Started on $event.dateString)',
+          'Started on ${event.dateString}',
           style: const TextStyle(
             color: CupertinoColors.systemGrey,
             fontSize: 16,
           ),
         ),
         const SizedBox(height: 12),
+
+        // First row for the first 6 segments (months)
         Row(
+          mainAxisAlignment: MainAxisAlignment.start,
           children: List.generate(
-            8,
-            (index) => Container(
-              width: 30,
-              height: 15,
-              margin: const EdgeInsets.only(right: 8),
-              decoration: BoxDecoration(
-                color:
-                    index < (daysRemaining / 60 * 8).floor()
-                        ? const Color(0xFF32CD32)
-                        : CupertinoColors.darkBackgroundGray,
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
+            6, // 6 segments for the first row
+            (index) {
+              bool isFilled =
+                  index < monthsSince; // Check if the segment is filled
+
+              return Container(
+                width: 30, // Set fixed width
+                height: 15, // Set fixed height
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color:
+                      isFilled
+                          ? eventColor // Apply event's color to progress bar
+                          : CupertinoColors.darkBackgroundGray,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              );
+            },
+          ),
+        ),
+
+        const SizedBox(height: 12),
+
+        // Second row for the next 6 segments (months)
+        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: List.generate(
+            6, // 6 segments for the second row
+            (index) {
+              bool isFilled =
+                  index + 6 < monthsSince; // Check if the segment is filled
+
+              return Container(
+                width: 30, // Set fixed width
+                height: 15, // Set fixed height
+                margin: const EdgeInsets.only(right: 8),
+                decoration: BoxDecoration(
+                  color:
+                      isFilled
+                          ? eventColor // Apply event's color to progress bar
+                          : CupertinoColors.darkBackgroundGray,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              );
+            },
           ),
         ),
       ],
