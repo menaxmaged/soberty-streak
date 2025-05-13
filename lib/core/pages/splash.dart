@@ -63,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen>
               children: [
                 // Lottie animation for the splash screen
                 Lottie.network(
-                  'https://lottie.host/2ecc6951-68d0-4d8f-8539-5b17098c102e/ArFqfNNkRV.json',
+                  'https://lottie.host/b1d78621-b158-45c8-860d-37c813bab4ce/z0Vw7E8Jsg.json',
                   width: 250,
                   height: 200,
                   repeat: false,
