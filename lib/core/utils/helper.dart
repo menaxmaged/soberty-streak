@@ -2,6 +2,8 @@
 // imports
 // import '/core/utils/cache-helper.dart';
 
+import 'dart:ffi';
+
 export 'functions.dart';
 export 'constants.dart';
 export 'cache-helper.dart';
@@ -25,3 +27,25 @@ String isLoggedInkey = 'isLoggedIn';
 //bool isLoggedIn = true;
 
 List<Map<String, dynamic>> eventsList = [];
+
+class Event {
+  String name;
+  String dateString;
+  int color;
+
+  Event({required this.name, required this.dateString, required this.color});
+
+  // Convert Event to a Map for serialization
+  Map<String, dynamic> toJson() {
+    return {'name': name, 'dateString': dateString, 'color': color};
+  }
+
+  // Create an Event from a Map
+  factory Event.fromJson(Map<String, dynamic> json) {
+    return Event(
+      name: json['name'],
+      dateString: json['dateString'],
+      color: json['color'],
+    );
+  }
+}

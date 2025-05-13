@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:soberty_streak/core/utils/helper.dart';
+import '/core/utils/helper.dart';
 
 class AddEventModal extends StatefulWidget {
   final Function(Map<String, dynamic>) onEventAdded;
@@ -16,6 +16,18 @@ class _AddEventModalState extends State<AddEventModal> {
   final TextEditingController nameController = TextEditingController();
   DateTime _startDate = DateTime.now();
   Color _selectedColor = const Color(0xFFFF4500); // Default orange color
+
+  late Event newEvent;
+
+  @override
+  void initState() {
+    super.initState();
+    newEvent = Event(
+      name: nameController.text.trim(),
+      dateString: DateFormat('yyyy-MM-dd').format(_startDate),
+      color: _selectedColor.value,
+    );
+  }
 
   void _addEvent(BuildContext context) {
     if (nameController.text.trim().isEmpty) {
@@ -39,12 +51,11 @@ class _AddEventModalState extends State<AddEventModal> {
       );
       return;
     }
-    final newEvent = {
-      "name": nameController.text.trim(),
-      "dateString": DateFormat('yyyy-MM-dd').format(_startDate),
-      "color": _selectedColor.value,
-    };
-    widget.onEventAdded(newEvent);
+
+    widget.onEventAdded(
+      newEvent.toJson(),
+    ); // Correctly passing the Event object
+
     Navigator.pop(context); // Close the modal after adding the event
   }
 
@@ -201,6 +212,7 @@ class _AddEventModalState extends State<AddEventModal> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                widgetPreview(newEvent, 0),
                 CupertinoTextField(
                   controller: nameController,
                   placeholder: "Event Name",
@@ -322,11 +334,7 @@ class _AddEventModalState extends State<AddEventModal> {
   }
 }
 
-Widget myWidgetFunction(
-  String name,
-  String startDateFormatted,
-  int daysRemaining,
-) {
+Widget widgetPreview(Event event, int daysRemaining) {
   return Container(
     padding: const EdgeInsets.all(16.0),
     decoration: BoxDecoration(
@@ -337,7 +345,7 @@ Widget myWidgetFunction(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          name.isEmpty ? '-' : name,
+          event.name.isEmpty ? 'End of An Era' : event.name,
           style: const TextStyle(
             color: Color(0xFF32CD32),
             fontSize: 20,
@@ -363,7 +371,7 @@ Widget myWidgetFunction(
         ),
         const SizedBox(height: 8),
         Text(
-          'Started on $startDateFormatted',
+          'Started on $event.dateString)',
           style: const TextStyle(
             color: CupertinoColors.systemGrey,
             fontSize: 16,
