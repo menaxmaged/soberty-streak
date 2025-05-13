@@ -79,13 +79,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       context: context,
       builder:
           (context) => Container(
-            padding: const EdgeInsets.only(top: 6.0),
-            margin: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
-            ),
-            color: CupertinoColors.systemBackground.resolveFrom(context),
             child: SafeArea(
-              top: false,
               child: AddEventModal(
                 onEventAdded: (context) {
                   print(context);

@@ -1,6 +1,5 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:flutter/rendering.dart';
+
 import '/core/utils/helper.dart';
 
 class AddEventModal extends StatefulWidget {
@@ -52,6 +51,13 @@ class _AddEventModalState extends State<AddEventModal> {
       return;
     }
 
+    // Prepare the event
+    newEvent = Event(
+      name: nameController.text.trim(),
+      dateString: DateFormat('yyyy-MM-dd').format(_startDate),
+      color: _selectedColor.value,
+    );
+
     widget.onEventAdded(newEvent.toJson()); // Pass the Event object as a Map
 
     Navigator.pop(context); // Close the modal after adding the event
@@ -62,7 +68,7 @@ class _AddEventModalState extends State<AddEventModal> {
       context: context,
       builder:
           (BuildContext context) => Container(
-            height: 216,
+            height: 350,
             padding: const EdgeInsets.only(top: 6.0),
             margin: EdgeInsets.only(
               bottom: MediaQuery.of(context).viewInsets.bottom,
@@ -91,12 +97,13 @@ class _AddEventModalState extends State<AddEventModal> {
   void _showColorPicker(BuildContext context) {
     showCupertinoModalPopup(
       context: context,
+
       builder:
           (BuildContext context) => Container(
-            height: 250, // Adjust as needed
+            height: 350, // Adjust as needed
             color: CupertinoColors.systemBackground.resolveFrom(context),
             child: CupertinoTheme(
-              data: CupertinoThemeData(brightness: Brightness.dark),
+              data: const CupertinoThemeData(brightness: Brightness.dark),
               child: Column(
                 children: [
                   Padding(
@@ -185,161 +192,173 @@ class _AddEventModalState extends State<AddEventModal> {
 
   @override
   Widget build(BuildContext context) {
-    return CupertinoPageScaffold(
-      backgroundColor: CupertinoColors.black, // Dark background
-      navigationBar: CupertinoNavigationBar(
-        leading: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () => Navigator.pop(context),
-          child: const Text(
-            'Cancel',
-            style: TextStyle(color: CupertinoColors.systemGrey),
-          ),
-        ),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () => _addEvent(context),
-          child: const Text(
-            'Done',
-            style: TextStyle(color: CupertinoColors.activeBlue),
-          ),
-        ),
-      ),
-      child: SafeArea(
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20.0),
-            boxShadow: const [BoxShadow(blurRadius: 8.0, offset: Offset(0, 4))],
-          ),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                widgetPreview(newEvent), // Pass updated event to the preview
-                CupertinoTextField(
-                  onChanged: (value) {
-                    setState(() {
-                      newEvent.name = nameController.text.trim();
-                    });
-                  },
-                  controller: nameController,
-                  placeholder: "Event Name",
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 16,
-                  ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        double modalHeight = constraints.maxHeight * 0.99;
 
-                  style: const TextStyle(color: CupertinoColors.white),
-                  placeholderStyle: const TextStyle(
-                    color: CupertinoColors.systemGrey,
-                  ),
-                  decoration: BoxDecoration(
-                    color: CupertinoColors.black.withOpacity(0.7),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: CupertinoColors.systemGrey.withOpacity(0.4),
-                    ),
-                  ),
+        return Container(
+          height: modalHeight,
+          child: CupertinoPageScaffold(
+            backgroundColor: CupertinoColors.black,
+            navigationBar: CupertinoNavigationBar(
+              leading: CupertinoButton(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                onPressed: () => Navigator.pop(context),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: CupertinoColors.systemGrey),
                 ),
-                const SizedBox(height: 30),
-                GestureDetector(
-                  onTap: () => _showSelectDate(context),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                      horizontal: 20,
-                    ),
-                    decoration: BoxDecoration(
-                      color: CupertinoColors.black.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color: CupertinoColors.systemGrey.withOpacity(0.4),
+              ),
+              trailing: CupertinoButton(
+                padding: EdgeInsets.symmetric(vertical: 10),
+                onPressed: () => _addEvent(context),
+                child: const Text(
+                  'Done',
+                  style: TextStyle(color: CupertinoColors.activeBlue),
+                ),
+              ),
+            ),
+            child: SafeArea(
+              child: SingleChildScrollView(
+                padding: EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    widgetPreview(newEvent),
+                    const SizedBox(height: 30),
+
+                    CupertinoTextField(
+                      onChanged: (value) {
+                        setState(() {
+                          newEvent.name = nameController.text.trim();
+                        });
+                      },
+                      controller: nameController,
+                      placeholder: "Event Name",
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 16,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: CupertinoColors.systemGrey.withOpacity(0.1),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
+                      style: const TextStyle(color: CupertinoColors.white),
+                      placeholderStyle: const TextStyle(
+                        color: CupertinoColors.systemGrey,
+                      ),
+                      decoration: BoxDecoration(
+                        color: CupertinoColors.black.withOpacity(0.7),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: CupertinoColors.systemGrey.withOpacity(0.4),
                         ),
-                      ],
+                      ),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Select Date',
-                          style: TextStyle(color: CupertinoColors.systemGrey),
+                    const SizedBox(height: 30),
+                    GestureDetector(
+                      onTap: () => _showSelectDate(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 20,
                         ),
-                        Text(
-                          DateFormat('d MMM yyyy').format(_startDate),
-                          style: const TextStyle(
-                            color: CupertinoColors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w500,
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.black.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(
+                            color: CupertinoColors.systemGrey.withOpacity(0.4),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 30),
-                GestureDetector(
-                  onTap: () => _showColorPicker(context),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 16,
-                      horizontal: 20,
-                    ),
-                    decoration: BoxDecoration(
-                      color: CupertinoColors.black.withOpacity(0.7),
-                      borderRadius: BorderRadius.circular(15),
-                      border: Border.all(
-                        color: CupertinoColors.systemGrey.withOpacity(0.4),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: CupertinoColors.systemGrey.withOpacity(0.1),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text(
-                          'Pick a color',
-                          style: TextStyle(color: CupertinoColors.systemGrey),
-                        ),
-                        Container(
-                          width: 35,
-                          height: 35,
-                          decoration: BoxDecoration(
-                            color: _selectedColor,
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: CupertinoColors.white,
-                              width: 2,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: _selectedColor.withOpacity(0.3),
-                                spreadRadius: 1,
-                                blurRadius: 5,
+                          boxShadow: [
+                            BoxShadow(
+                              color: CupertinoColors.systemGrey.withOpacity(
+                                0.1,
                               ),
-                            ],
-                          ),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
-                      ],
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Select Date',
+                              style: TextStyle(
+                                color: CupertinoColors.systemGrey,
+                              ),
+                            ),
+                            Text(
+                              DateFormat('d MMM yyyy').format(_startDate),
+                              style: const TextStyle(
+                                color: CupertinoColors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 30),
+                    GestureDetector(
+                      onTap: () => _showColorPicker(context),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 20,
+                        ),
+                        decoration: BoxDecoration(
+                          color: CupertinoColors.black.withOpacity(0.7),
+                          borderRadius: BorderRadius.circular(15),
+                          border: Border.all(
+                            color: CupertinoColors.systemGrey.withOpacity(0.4),
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: CupertinoColors.systemGrey.withOpacity(
+                                0.1,
+                              ),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Pick a color',
+                              style: TextStyle(
+                                color: CupertinoColors.systemGrey,
+                              ),
+                            ),
+                            Container(
+                              width: 35,
+                              height: 35,
+                              decoration: BoxDecoration(
+                                color: _selectedColor,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: CupertinoColors.white,
+                                  width: 2,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: _selectedColor.withOpacity(0.3),
+                                    spreadRadius: 1,
+                                    blurRadius: 5,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -360,9 +379,9 @@ Widget widgetPreview(Event event) {
   // Convert the event color from int to Color
   Color eventColor = Color(event.color);
 
-  // Calculate the number of months that have passed
+  // Calculate the number of months that have passed (up to 12)
   int monthsSince = (daysSince / 30).floor();
-  if (monthsSince > 12) monthsSince = 12; // Limit to 12 months
+  if (monthsSince > 12) monthsSince = 12;
 
   return Container(
     padding: const EdgeInsets.all(16.0),
@@ -375,9 +394,9 @@ Widget widgetPreview(Event event) {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
-          event.name.isEmpty ? 'End of An Era' : event.name,
+          event.name.isEmpty ? 'Event Name' : event.name,
           style: TextStyle(
-            color: eventColor, // Use the event's color for text
+            color: eventColor,
             fontSize: 20,
             fontWeight: FontWeight.bold,
           ),
@@ -388,7 +407,7 @@ Widget widgetPreview(Event event) {
             Text(
               '$daysSince ',
               style: TextStyle(
-                color: eventColor, // Use the event's color for days since text
+                color: eventColor,
                 fontSize: 36,
                 fontWeight: FontWeight.bold,
               ),
@@ -408,57 +427,44 @@ Widget widgetPreview(Event event) {
           ),
         ),
         const SizedBox(height: 12),
-
-        // First row for the first 6 segments (months)
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
-          children: List.generate(
-            6, // 6 segments for the first row
-            (index) {
-              bool isFilled =
-                  index < monthsSince; // Check if the segment is filled
-
-              return Container(
-                width: 30, // Set fixed width
-                height: 15, // Set fixed height
-                margin: const EdgeInsets.only(right: 8),
-                decoration: BoxDecoration(
-                  color:
-                      isFilled
-                          ? eventColor // Apply event's color to progress bar
-                          : CupertinoColors.darkBackgroundGray,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              );
-            },
-          ),
+          children: List.generate(6, (index) {
+            bool isFilled = index < monthsSince;
+            return Container(
+              width: 30,
+              height: 15,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color:
+                    isFilled
+                        ? eventColor
+                        : CupertinoColors
+                            .darkBackgroundGray, // Corrected this line
+                borderRadius: BorderRadius.circular(4),
+              ),
+            );
+          }),
         ),
-
-        const SizedBox(height: 12),
-
-        // Second row for the next 6 segments (months)
+        const SizedBox(height: 8),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
-          children: List.generate(
-            6, // 6 segments for the second row
-            (index) {
-              bool isFilled =
-                  index + 6 < monthsSince; // Check if the segment is filled
-
-              return Container(
-                width: 30, // Set fixed width
-                height: 15, // Set fixed height
-                margin: const EdgeInsets.only(right: 8),
-                decoration: BoxDecoration(
-                  color:
-                      isFilled
-                          ? eventColor // Apply event's color to progress bar
-                          : CupertinoColors.darkBackgroundGray,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              );
-            },
-          ),
+          children: List.generate(6, (index) {
+            bool isFilled = index + 6 < monthsSince;
+            return Container(
+              width: 30,
+              height: 15,
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color:
+                    isFilled
+                        ? eventColor
+                        : CupertinoColors
+                            .darkBackgroundGray, // Corrected this line
+                borderRadius: BorderRadius.circular(4),
+              ),
+            );
+          }),
         ),
       ],
     ),
