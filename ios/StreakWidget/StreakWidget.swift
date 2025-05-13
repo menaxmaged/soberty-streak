@@ -55,20 +55,16 @@ struct SimpleEntry: TimelineEntry {
 // Widget View
 struct StreakWidgetEntryView: View {
     var entry: Provider.Entry
-
+    
     var currentEvent: Event {
         entry.event
     }
     // Computed property for eventList
-    var eventList: [Event] {
-        // Use the repeating initializer to return 4 copies of currentEvent
-        return Array(repeating: currentEvent, count: 4)
-    }
-
+    var eventList: [Event]{entry.eventList}
+    
     @Environment(\.widgetFamily) var family  // Detect the widget size
 
-    var body: some View {
-        if entry.configuration.selectedEvent != nil {
+    var body: some View {        if entry.configuration.selectedEvent != nil {
             // Use the selected event
             VStack {
                 switch family {
@@ -79,16 +75,16 @@ struct StreakWidgetEntryView: View {
                     AccessoryWidgetRectView(event: currentEvent)
 
                 case .systemSmall:
-                    SmallWidgetView(event: currentEvent)
+                    SmallWidgetView(event: currentEvent)            .foregroundStyle(argbToBuiltInColor(argb: currentEvent.color))
+
                 case .systemMedium:
                     MediumWidgetView(eventList: eventList)
                 case .systemLarge:
-                                    LargeWidgetView(event: currentEvent)
+                                    LargeWidgetView(event: currentEvent,eventList: eventList)
                 default:
                     SmallWidgetView(event: currentEvent)
                 }
-            }.foregroundStyle(.green)
-        } else {
+            }        } else {
             Text("No event selected")
                 .font(.headline).foregroundStyle(.white)
         }

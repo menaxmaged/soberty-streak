@@ -4,6 +4,8 @@
 
 import 'dart:ffi';
 
+import 'package:flutter/cupertino.dart';
+
 export 'functions.dart';
 export 'constants.dart';
 export 'cache-helper.dart';

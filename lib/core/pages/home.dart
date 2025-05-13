@@ -53,7 +53,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     try {
       String eventsJson = jsonEncode(eventsList);
       await HomeWidget.saveWidgetData(eventsDataKey, eventsJson);
-      await HomeWidget.updateWidget(name: iosWidgetName);
+      await HomeWidget.updateWidget(
+        name: iosWidgetName,
+        iOSName: iosWidgetName,
+        androidName: iosWidgetName,
+      );
       // Optionally show a success snackbar or feedback message
     } catch (e) {
       print("Error pushing events to Widget: $e");

@@ -1,5 +1,3 @@
-import 'package:flutter/rendering.dart';
-
 import '/core/utils/helper.dart';
 
 class AddEventModal extends StatefulWidget {
@@ -14,7 +12,7 @@ class AddEventModal extends StatefulWidget {
 class _AddEventModalState extends State<AddEventModal> {
   final TextEditingController nameController = TextEditingController();
   DateTime _startDate = DateTime.now();
-  Color _selectedColor = const Color(0xFFFF4500); // Default orange color
+  Color _selectedColor = CupertinoColors.activeBlue; // Default orange color
 
   late Event newEvent;
 
@@ -24,7 +22,7 @@ class _AddEventModalState extends State<AddEventModal> {
     newEvent = Event(
       name: "Event Name",
       dateString: DateFormat('yyyy-MM-dd').format(_startDate),
-      color: _selectedColor.value,
+      color: _selectedColor.toARGB32(),
     );
   }
 
@@ -129,12 +127,13 @@ class _AddEventModalState extends State<AddEventModal> {
                       itemCount: _availableColors.length,
                       itemBuilder: (context, index) {
                         final color = _availableColors[index];
+                        print("Color: ${color.toARGB32()}");
                         return GestureDetector(
                           onTap: () {
                             setState(() {
                               _selectedColor = color;
                               // Update the event's color when the color is changed
-                              newEvent.color = _selectedColor.value;
+                              newEvent.color = _selectedColor.toARGB32();
                             });
                             Navigator.pop(context); // Close the color picker
                           },
@@ -173,23 +172,21 @@ class _AddEventModalState extends State<AddEventModal> {
   }
 
   final List<Color> _availableColors = [
-    const Color(0xFFFF4500), // Orange
-    const Color(0xFF007AFF), // Blue
-    const Color(0xFF4CD964), // Green
-    const Color(0xFFFFD600), // Yellow
-    const Color(0xFF5856D6), // Purple
-    const Color(0xFFFF2D55), // Red
-    const Color(0xFF34AADC), // Light Blue
-    const Color(0xFF5AC8FA), // Another Light Blue
-    const Color(0xFF0CDCFE), // Cyan
-    const Color(0xFF30D158), // Another Green
-    const Color(0xFF8E8E93), // Gray
-    const Color(0xFFC7C7CC), // Light Gray
-    const Color(0xFFD1D1D6), // Another Light Gray
-    const Color(0xFFFF9F0A), // Amber
-    const Color(0xFFFA87C0), // Pink
+    CupertinoColors.systemOrange, // Orange
+    CupertinoColors.systemBlue, // Blue
+    CupertinoColors.systemGreen, // Green
+    CupertinoColors.systemYellow, // Yellow
+    CupertinoColors.systemPurple, // Purple
+    CupertinoColors.systemRed, // Red
+    CupertinoColors.systemTeal, // Light Blue
+    CupertinoColors.systemTeal, // Another Light Blue
+    CupertinoColors.systemCyan, // Cyan
+    CupertinoColors.systemGreen, // Another Green
+    CupertinoColors.systemFill, // Gray
+    CupertinoColors.systemGrey2, // Light Gray
+    CupertinoColors.systemGrey4, // Another Light Gray
+    CupertinoColors.systemPink, // Pink
   ];
-
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(

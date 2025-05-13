@@ -14,9 +14,10 @@ struct Event: Identifiable, Codable ,Hashable{
     var date: Date
     let days: Int
     let formattedDate: String
+    let color: Int
     
     // Custom initializer to calculate days only once
-    init(name: String, date: Date) {
+    init(name: String, date: Date,color: Int) {
         self.name = name
         self.date = date
         self.days = Calendar.current.dateComponents([.day], from: date, to: Date()).day ?? 0
@@ -28,10 +29,11 @@ struct Event: Identifiable, Codable ,Hashable{
         formatter.dateFormat = "d MMM" // Only Day and Month (e.g., "14 Mar")
         
         self.formattedDate = formatter.string(from: date)
+        self.color = color
     }
     
     // Overloaded initializer for String input
-    init(name: String, dateString: String) {
+    init(name: String, dateString: String,color: Int) {
         self.name = name
         
         // Convert the date string to a Date object
@@ -44,12 +46,15 @@ struct Event: Identifiable, Codable ,Hashable{
         // Create a formatted date string (Day and Month Only)
         formatter.dateFormat = "d MMM" // Only Day and Month (e.g., "14 Mar")
         self.formattedDate = formatter.string(from: self.date)
+        self.color = color
+
     }
     
     // Custom CodingKeys to map JSON keys
     enum CodingKeys: String, CodingKey {
         case name
         case dateString
+        case color
     }
     
     // Custom Decoder for JSON
@@ -57,7 +62,7 @@ struct Event: Identifiable, Codable ,Hashable{
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.name = try container.decode(String.self, forKey: .name)
         let dateString = try container.decode(String.self, forKey: .dateString)
-        
+        self.color = try container.decode(Int.self, forKey: .color)
         // Date conversion
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd" // Expected date format
@@ -69,6 +74,8 @@ struct Event: Identifiable, Codable ,Hashable{
         // Create a formatted date string (Day and Month Only)
         formatter.dateFormat = "d MMM" // Only Day and Month (e.g., "14 Mar")
         self.formattedDate = formatter.string(from: self.date)
+        
+        // Create The cikir
     }
     
     // Custom Encoder for JSON
@@ -87,7 +94,7 @@ struct Event: Identifiable, Codable ,Hashable{
     
     // Default Event
       static var defaultEvent: Event {
-          return Event(name: "Default Event", date: Date())
+          return Event(name: "Default Event", date: Date(),color:33)
       }
 
     
