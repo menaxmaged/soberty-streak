@@ -69,7 +69,7 @@ struct StreakWidgetEntryView: View {
             VStack {
                 switch family {
                 case .accessoryCircular:
-                    AccessoryWidgetView(event: currentEvent)
+                    AccessoryWidgetView(event: currentEvent).gaugeStyle(.accessoryCircular)
 
                 case .accessoryRectangular:
                     AccessoryWidgetRectView(event: currentEvent)
@@ -91,17 +91,23 @@ struct StreakWidgetEntryView: View {
     }
 }
 
-// Widget Init
 struct StreakWidget: Widget {
     let kind: String = "StreakWidget"
 
     var body: some WidgetConfiguration {
         AppIntentConfiguration(
-            kind: kind, intent: ConfigurationAppIntent.self, provider: Provider()
+            kind: kind,
+            intent: ConfigurationAppIntent.self,
+            provider: Provider()
         ) { entry in
             StreakWidgetEntryView(entry: entry)
-                .containerBackground(.black, for: .widget)
-        }
+                .containerBackground(.black, for: .widget) // Setting background color to black
+        }                .supportedFamilies([
+            .accessoryInline,
+            .accessoryRectangular,
+            .accessoryCircular
+        ]) // Supported widget families
+
     }
 }
 

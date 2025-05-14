@@ -20,6 +20,7 @@ export 'dart:developer' hide Flow;
 export 'package:home_widget/home_widget.dart';
 export 'package:intl/intl.dart' hide TextDirection;
 export 'package:flutter/material.dart' hide RefreshCallback;
+import 'package:cloud_kit/cloud_kit.dart';
 
 String isDarkModekey = 'isDarkMode';
 // bool? isDarkMode = CacheHelper.getData(isDarkModekey);
@@ -51,3 +52,8 @@ class Event {
     );
   }
 }
+
+CloudKit cloudKit = CloudKit(
+  'iCloud.net.codexeg.sobertystreaker',
+); // Enter your container id
+

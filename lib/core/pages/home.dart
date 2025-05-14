@@ -1,4 +1,6 @@
 import '/core/utils/helper.dart';
+import 'package:cloud_kit/cloud_kit.dart';
+import 'package:flutter/services.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -13,6 +15,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     super.initState();
     HomeWidget.setAppGroupId(appGroupId);
     WidgetsBinding.instance.addObserver(this);
+
     loadEvents();
   }
 
@@ -24,35 +27,78 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   /// Load Events from Widget Data
   Future<void> loadEvents() async {
-    final eventsJson = await HomeWidget.getWidgetData<String>(eventsDataKey);
-    if (eventsJson != null) {
+    // Check iCloud account status
+    CloudKitAccountStatus accountStatus = await cloudKit.getAccountStatus();
+
+    // Try to get data from the widget
+    final String? eventsJson = await HomeWidget.getWidgetData<String>(
+      eventsDataKey,
+    );
+
+    // If widget data is unavailable, fetch from iCloud
+    final String dataToUse = eventsJson ?? await cloudKit.get('events') ?? '';
+
+    // Check if data is available
+    if (dataToUse.isNotEmpty) {
+      // Set the state to update the UI
       setState(() {
-        eventsList = List<Map<String, dynamic>>.from(jsonDecode(eventsJson));
+        // Update the widget with the loaded events data
+        pushEventsToWidget(dataToUse);
+
+        // Parse the JSON data into a list of events
+        try {
+          eventsList = List<Map<String, dynamic>>.from(jsonDecode(dataToUse));
+        } catch (e) {
+          // Handle JSON decoding errors
+          print("Error decoding events data: $e");
+        }
       });
+    } else {
+      print("No events data found.");
     }
   }
 
-  /// Add Event Manually
-  void addEvent(event) {
-    try {
-      DateTime eventDate = dateFormat.parse(event.date);
-      String formattedDate = dateFormat.format(eventDate);
+  Future<void> saveEvents() async {
+    String eventsJson = jsonEncode(eventsList);
 
-      final newEvent = {'name': event.name, 'dateString': formattedDate};
-      setState(() {
-        //        eventsList.add(newEvent);
-      });
-      //      pushEventsToWidget();
+    try {
+      await pushEventsToWidget(eventsJson);
+
+      CloudKitAccountStatus accountStatus = await cloudKit.getAccountStatus();
+      if (accountStatus == CloudKitAccountStatus.available) {
+        print("logged IN");
+        print("Pushing");
+
+        print(
+          await cloudKit.save('events', eventsJson),
+        ); // both must be strings, if you want to save objects use the JSON format
+
+        // User is logged in to iCloud, you can start using the plugin
+      }
     } catch (e) {
-      print("Error: Invalid date format.");
+      if (e is PlatformException && e.code == 'Error') {
+        // Handle the case where the key already exists
+        print("Record already exists in the database");
+        print(await deleteEvents());
+        print(await cloudKit.save('events', eventsJson));
+        // You could perform an update or notify the user, etc.
+      }
+
+      print("Error pushing events to Icloud: $e");
     }
+  }
+
+  Future<bool> deleteEvents() async {
+    print("deleting");
+    return await cloudKit.delete(
+      'events',
+    ); // returns a boolean if it was successful
   }
 
   /// Push Events Data to Widget
-  Future<void> pushEventsToWidget() async {
+  Future<void> pushEventsToWidget(String events) async {
     try {
-      String eventsJson = jsonEncode(eventsList);
-      await HomeWidget.saveWidgetData(eventsDataKey, eventsJson);
+      await HomeWidget.saveWidgetData(eventsDataKey, events);
       await HomeWidget.updateWidget(
         name: iosWidgetName,
         iOSName: iosWidgetName,
@@ -69,9 +115,21 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     setState(() {
       eventsList.clear();
     });
+    await deleteEvents();
     await HomeWidget.saveWidgetData(eventsDataKey, jsonEncode([]));
     await HomeWidget.updateWidget(name: iosWidgetName, iOSName: iosWidgetName);
     print("Events reset successfully.");
+  }
+
+  void getter() async {
+    print("zzz");
+    CloudKitAccountStatus accountStatus = await cloudKit.getAccountStatus();
+    if (accountStatus == CloudKitAccountStatus.available) {
+      print("logged IN");
+      print(accountStatus);
+      print(await cloudKit.get('events'));
+      // User is logged in to iCloud, you can start using the plugin
+    }
   }
 
   @override
@@ -90,7 +148,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   setState(() {
                     eventsList.add(context);
                   });
-                  pushEventsToWidget();
+                  saveEvents();
                   print("object");
                 },
               ),
@@ -139,7 +197,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                                   setState(() {
                                     eventsList.removeAt(index);
                                   });
-                                  pushEventsToWidget();
+                                  saveEvents();
                                 },
                               ),
                             );
@@ -153,6 +211,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                 child: Text('Reset Events'),
               ),
               SizedBox(height: 20),
+              CupertinoButton(onPressed: getter, child: Text('Get Events')),
             ],
           ),
         ),

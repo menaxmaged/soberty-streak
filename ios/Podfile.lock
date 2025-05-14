@@ -1,4 +1,6 @@
 PODS:
+  - cloud_kit (0.0.1):
+    - Flutter
   - Flutter (1.0.0)
   - home_widget (0.0.1):
     - Flutter
@@ -10,12 +12,15 @@ PODS:
     - FlutterMacOS
 
 DEPENDENCIES:
+  - cloud_kit (from `.symlinks/plugins/cloud_kit/ios`)
   - Flutter (from `Flutter`)
   - home_widget (from `.symlinks/plugins/home_widget/ios`)
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
 
 EXTERNAL SOURCES:
+  cloud_kit:
+    :path: ".symlinks/plugins/cloud_kit/ios"
   Flutter:
     :path: Flutter
   home_widget:
@@ -26,6 +31,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
 
 SPEC CHECKSUMS:
+  cloud_kit: 888e199a59204ab4e0ed10e07cc6a770c4d570f7
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   home_widget: f169fc41fd807b4d46ab6615dc44d62adbf9f64f
   path_provider_foundation: 080d55be775b7414fd5a5ef3ac137b97b097e564
